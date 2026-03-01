@@ -1,5 +1,5 @@
 import streamlit as st
-import anthropic
+from openai import OpenAI
 
 # ── Configurazione pagina ──────────────────────────────────────────────────────
 st.set_page_config(
@@ -130,9 +130,9 @@ if "messages" not in st.session_state:
 if "client" not in st.session_state:
     try:
         api_key = st.secrets["OPENROUTER_API_KEY"]
-        st.session_state.client = anthropic.Anthropic(
+        st.session_state.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
             api_key=api_key,
-            base_url="https://openrouter.ai/api/v1"
         )
         st.session_state.api_ready = True
     except Exception:
@@ -190,17 +190,21 @@ if prompt := st.chat_input("Scrivi qui il tuo messaggio..."):
         full_response = ""
 
         try:
-            with st.session_state.client.messages.stream(
+            stream = st.session_state.client.chat.completions.create(
                 model="anthropic/claude-sonnet-4-5",
                 max_tokens=1024,
-                system=SYSTEM_PROMPT,
+                stream=True,
                 messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT}
+                ] + [
                     {"role": m["role"], "content": m["content"]}
                     for m in st.session_state.messages
                 ]
-            ) as stream:
-                for text in stream.text_stream:
-                    full_response += text
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content
+                if delta:
+                    full_response += delta
                     response_placeholder.markdown(full_response + "▌")
             response_placeholder.markdown(full_response)
 
