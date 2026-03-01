@@ -129,8 +129,11 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "client" not in st.session_state:
     try:
-        api_key = st.secrets["ANTHROPIC_API_KEY"]
-        st.session_state.client = anthropic.Anthropic(api_key=api_key)
+        api_key = st.secrets["OPENROUTER_API_KEY"]
+        st.session_state.client = anthropic.Anthropic(
+            api_key=api_key,
+            base_url="https://openrouter.ai/api/v1"
+        )
         st.session_state.api_ready = True
     except Exception:
         st.session_state.api_ready = False
@@ -152,7 +155,7 @@ st.write("")
 
 # ── Controllo API ──────────────────────────────────────────────────────────────
 if not st.session_state.get("api_ready"):
-    st.error("⚠️ API key non trovata. Configura ANTHROPIC_API_KEY nei secrets di Streamlit.")
+    st.error("⚠️ API key non trovata. Configura OPENROUTER_API_KEY nei secrets di Streamlit.")
     st.stop()
 
 # ── Visualizzazione storico ────────────────────────────────────────────────────
@@ -188,7 +191,7 @@ if prompt := st.chat_input("Scrivi qui il tuo messaggio..."):
 
         try:
             with st.session_state.client.messages.stream(
-                model="claude-sonnet-4-5",
+                model="anthropic/claude-sonnet-4-5",
                 max_tokens=1024,
                 system=SYSTEM_PROMPT,
                 messages=[
@@ -214,6 +217,6 @@ with st.sidebar:
         st.session_state.messages = []
         st.rerun()
     st.divider()
-    st.caption("Modello: claude-sonnet-4-5")
+    st.caption("Modello: anthropic/claude-sonnet-4-5")
     st.caption("Corso: 00686 – MAT/07")
     st.caption("Università di Bologna")
