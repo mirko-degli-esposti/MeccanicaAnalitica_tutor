@@ -202,6 +202,8 @@ if prompt := st.chat_input("Scrivi qui il tuo messaggio..."):
                 ]
             )
             for chunk in stream:
+                if not chunk.choices:
+                    continue
                 delta = chunk.choices[0].delta.content
                 if delta:
                     full_response += delta
