@@ -1,6 +1,7 @@
 import streamlit as st
 from openai import OpenAI
 
+
 # ── Modelli disponibili ────────────────────────────────────────────────────────
 MODELS = {
     "Claude Sonnet 4.5 (consigliato)": "anthropic/claude-sonnet-4-5",
