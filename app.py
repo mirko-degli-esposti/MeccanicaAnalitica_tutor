@@ -1,6 +1,16 @@
 import streamlit as st
 from openai import OpenAI
 
+# ── Modelli disponibili ────────────────────────────────────────────────────────
+MODELS = {
+    "Claude Sonnet 4.5 (consigliato)": "anthropic/claude-sonnet-4-5",
+    "Llama 3.3 70B (open, gratuito)":  "meta-llama/llama-3.3-70b-instruct",
+    "Mistral Large (open, italiano)":  "mistralai/mistral-large",
+    "Qwen 2.5 72B (open, economico)":  "qwen/qwen-2.5-72b-instruct",
+    "DeepSeek R1 (open, STEM)":        "deepseek/deepseek-r1",
+}
+ 
+
 # ── Configurazione pagina ──────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Tutor – Meccanica Analitica",
@@ -127,6 +137,8 @@ FORMATO
 # ── Inizializzazione sessione ──────────────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "selected_model_label" not in st.session_state:
+    st.session_state.selected_model_label = list(MODELS.keys())[0]
 if "client" not in st.session_state:
     try:
         api_key = st.secrets["OPENROUTER_API_KEY"]
@@ -191,7 +203,7 @@ if prompt := st.chat_input("Scrivi qui il tuo messaggio..."):
 
         try:
             stream = st.session_state.client.chat.completions.create(
-                model="anthropic/claude-sonnet-4-5",
+                model=MODELS[st.session_state.selected_model_label],
                 max_tokens=1024,
                 stream=True,
                 messages=[
